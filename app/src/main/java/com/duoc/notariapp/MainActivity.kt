@@ -13,13 +13,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.duoc.notariapp.ui.theme.Evaluacion2Theme
 import com.duoc.notariapp.uii.Registro
+import com.duoc.notariapp.uii.CamaraFotos
+import com.duoc.notariapp.uii.BotonCargando
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             Evaluacion2Theme {
-                Registro()
+                //Registro()
+                //CamaraFotos()
+                BotonCargando()
                 }
             }
         }
