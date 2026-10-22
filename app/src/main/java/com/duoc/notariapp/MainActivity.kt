@@ -15,6 +15,8 @@ import com.duoc.notariapp.ui.theme.Evaluacion2Theme
 import com.duoc.notariapp.uii.Registro
 import com.duoc.notariapp.uii.CamaraFotos
 import com.duoc.notariapp.uii.BotonCargando
+import com.duoc.notariapp.uii.Navegacion
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,7 +25,8 @@ class MainActivity : ComponentActivity() {
             Evaluacion2Theme {
                 //Registro()
                 //CamaraFotos()
-                BotonCargando()
+                //BotonCargando()
+                Navegacion()
                 }
             }
         }

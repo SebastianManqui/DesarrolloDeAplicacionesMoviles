@@ -1,4 +1,5 @@
 package com.duoc.notariapp.uii
+
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -10,13 +11,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.duoc.notariapp.R
+
+
 @Composable
-fun Registro() {
+fun Registro(navController: NavController) {
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
     var errorCorreo by remember { mutableStateOf(false) }
-    var sinsesion by remember { mutableStateOf(value ="") }
 
     val context = LocalContext.current
 
@@ -31,13 +34,16 @@ fun Registro() {
         Text(text = "Realiza tus tramites desde tu casa", style = MaterialTheme.typography.bodyMedium)
 
         Spacer(modifier = Modifier.height(32.dp))
+
         Image(
             painter = painterResource(id = R.drawable.logonotariaexpress),
             contentDescription = "Logo Notariaexpress",
             modifier = Modifier
-                .size(500.dp)
+                .fillMaxWidth()
+                .height(180.dp)
                 .padding(bottom = 16.dp)
         )
+
         OutlinedTextField(
             value = correo,
             onValueChange = {
@@ -48,7 +54,6 @@ fun Registro() {
             isError = errorCorreo,
             modifier = Modifier.fillMaxWidth()
         )
-
 
         if (errorCorreo) {
             Text(text = "El correo no puede estar vacio", color = MaterialTheme.colorScheme.error)
@@ -72,7 +77,10 @@ fun Registro() {
                     errorCorreo = true
                     Toast.makeText(context, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(context, "ingreso correctamente", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Ingreso correctamente", Toast.LENGTH_SHORT).show()
+                    navController.navigate("paginaPrincipal") {
+                        popUpTo("login") { inclusive = true }
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth()
