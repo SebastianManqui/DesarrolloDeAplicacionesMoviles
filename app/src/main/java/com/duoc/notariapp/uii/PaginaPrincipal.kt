@@ -1,6 +1,6 @@
 package com.duoc.notariapp.uii
 
-import androidx.compose.foundation.clickable // 1. IMPORTACIÓN AGREGADA
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -82,7 +82,7 @@ fun PaginaPrincipal(navController: NavController) {
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(text = "Perfil del usuario")
-                    Text(text = "Tus datos y tu documentación", fontSize = 12.sp, color = Color.Gray)
+                    Text(text = "Datos Personales y tu documentos", fontSize = 12.sp, color = Color.Gray)
                 }
             }
         }
@@ -99,7 +99,7 @@ fun PaginaPrincipal(navController: NavController) {
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(text = "Ubicaciones de sucursales")
-                    Text(text = "Encuentra tu notaría más cercana", fontSize = 12.sp, color = Color.Gray)
+                    Text(text = "Sucursal mas cercana", fontSize = 12.sp, color = Color.Gray)
                 }
             }
         }
@@ -107,6 +107,9 @@ fun PaginaPrincipal(navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
+                .clickable {
+                    navController.navigate("tramites")
+                }
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
@@ -120,6 +123,7 @@ fun PaginaPrincipal(navController: NavController) {
                 }
             }
         }
+
         Spacer(modifier = Modifier.height(20.dp))
         OutlinedButton(
             onClick = {

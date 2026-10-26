@@ -21,6 +21,8 @@ fun Navegacion() {
         }
         composable("perfil") { Perfil(navController = navController) }
         composable("datosPersonales") { DatosPersonales(navController = navController) }
+        composable("seleccionarTramite") { SeleccionarTramite(navController = navController) }
+        composable("tramites") { TramitesSeguimiento(navController = navController) }
 
     }
 }
