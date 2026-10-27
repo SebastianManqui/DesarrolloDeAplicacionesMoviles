@@ -35,8 +35,13 @@ fun PaginaPrincipal(navController: NavController) {
         Text(text = "Bienvenidos a NotariaExpress", fontSize = 28.sp)
         Text(text = "Todo lo que necesitas para avanzar con tranquilidad.", fontSize = 14.sp, color = Color.Gray)
         Spacer(modifier = Modifier.height(20.dp))
+
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    navController.navigate("estadoTramite")
+                },
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -46,9 +51,11 @@ fun PaginaPrincipal(navController: NavController) {
                 Text(text = "En revision ", fontSize = 12.sp, color = Color.LightGray)
             }
         }
+
         Spacer(modifier = Modifier.height(24.dp))
         Text(text = "¿Qué tramite deseas hacer en NotariaExpress?", fontSize = 18.sp)
         Spacer(modifier = Modifier.height(12.dp))
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -66,6 +73,7 @@ fun PaginaPrincipal(navController: NavController) {
                 }
             }
         }
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -86,10 +94,14 @@ fun PaginaPrincipal(navController: NavController) {
                 }
             }
         }
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
+                .clickable {
+                    navController.navigate("listaSucursales")
+                }
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
@@ -103,6 +115,7 @@ fun PaginaPrincipal(navController: NavController) {
                 }
             }
         }
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -125,6 +138,7 @@ fun PaginaPrincipal(navController: NavController) {
         }
 
         Spacer(modifier = Modifier.height(20.dp))
+
         OutlinedButton(
             onClick = {
                 navController.navigate("login") {

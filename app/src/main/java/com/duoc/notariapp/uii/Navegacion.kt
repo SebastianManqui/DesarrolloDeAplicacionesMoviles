@@ -23,6 +23,9 @@ fun Navegacion() {
         composable("datosPersonales") { DatosPersonales(navController = navController) }
         composable("seleccionarTramite") { SeleccionarTramite(navController = navController) }
         composable("tramites") { TramitesSeguimiento(navController = navController) }
+        composable("estadoTramite") { EstadoTramite(navController = navController) }
+        composable("contactoSucursal") { ContactoSucursal(navController = navController) }
+        composable("listaSucursales") { ListaSucursales(navController = navController) }
 
     }
 }
