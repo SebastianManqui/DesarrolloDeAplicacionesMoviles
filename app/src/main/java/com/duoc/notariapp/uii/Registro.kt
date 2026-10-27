@@ -14,12 +14,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.duoc.notariapp.R
 
-
 @Composable
 fun Registro(navController: NavController) {
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
     var errorCorreo by remember { mutableStateOf(false) }
+    var errorContrasena by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -56,31 +56,52 @@ fun Registro(navController: NavController) {
         )
 
         if (errorCorreo) {
-            Text(text = "El correo no puede estar vacio", color = MaterialTheme.colorScheme.error)
+            Text(
+                text = "Ingresa un correo valido (debe contener '@')",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = contrasena,
-            onValueChange = { contrasena = it },
+            onValueChange = {
+                contrasena = it
+                errorContrasena = false
+            },
             label = { Text("Contraseña") },
+            isError = errorContrasena,
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (errorContrasena) {
+            Text(
+                text = "La contraseña no puede estar vacia",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
             onClick = {
-                if (correo.isBlank() || contrasena.isBlank()) {
-                    errorCorreo = true
-                    Toast.makeText(context, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
-                } else {
+                val correoValido = correo.isNotBlank() && correo.contains("@")
+                val contrasenaValida = contrasena.isNotBlank()
+
+                errorCorreo = !correoValido
+                errorContrasena = !contrasenaValida
+
+                if (correoValido && contrasenaValida) {
                     Toast.makeText(context, "Ingreso correctamente", Toast.LENGTH_SHORT).show()
                     navController.navigate("paginaPrincipal") {
                         popUpTo("login") { inclusive = true }
                     }
+                } else {
+                    Toast.makeText(context, "Por favor completa los campos correctamente", Toast.LENGTH_SHORT).show()
                 }
             },
             modifier = Modifier.fillMaxWidth()
