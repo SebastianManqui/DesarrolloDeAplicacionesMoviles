@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -16,11 +17,10 @@ import com.duoc.notariapp.R
 
 @Composable
 fun Registro(navController: NavController) {
-    var correo by remember { mutableStateOf("") }
+    var correo by rememberSaveable { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
     var errorCorreo by remember { mutableStateOf(false) }
     var errorContrasena by remember { mutableStateOf(false) }
-
     val context = LocalContext.current
 
     Column(

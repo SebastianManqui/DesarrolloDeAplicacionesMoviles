@@ -1,5 +1,6 @@
 package com.duoc.notariapp.uii
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,16 +16,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SeleccionarTramite(navController: NavController) {
     var tipoTramite by remember { mutableStateOf("") }
     var sucursal by remember { mutableStateOf("") }
     var cargando by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
+
+    val tramitesDisponibles = listOf(
+        "Declaración Jurada",
+        "Poder Simple",
+        "Contrato de Arriendo",
+        "Validación de Firma",
+        "Fotocopia Legalizada"
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -55,20 +66,48 @@ fun SeleccionarTramite(navController: NavController) {
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Completa los campos para continuar con tu trámite notarial.",
+            text = "Completa los campos o selecciona uno de la lista rápida.",
             fontSize = 13.sp,
             color = Color.Gray
         )
+
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "Trámites sugeridos (Toca uno para autocompletar):",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            tramitesDisponibles.forEach { tramite ->
+                SuggestionChip(
+                    onClick = { tipoTramite = tramite },
+                    label = { Text(tramite, fontSize = 12.sp) },
+                    shape = RoundedCornerShape(8.dp)
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.height(20.dp))
+
         OutlinedTextField(
             value = tipoTramite,
             onValueChange = { tipoTramite = it },
-            label = { Text("Tipo de trámite (ej: Declaración Jurada, Firma)") },
+            label = { Text("Tipo de trámite") },
+            placeholder = { Text("Escribe o selecciona un trámite") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             shape = RoundedCornerShape(10.dp)
         )
+
         Spacer(modifier = Modifier.height(16.dp))
+
         OutlinedTextField(
             value = sucursal,
             onValueChange = { sucursal = it },
@@ -79,10 +118,11 @@ fun SeleccionarTramite(navController: NavController) {
         )
 
         Spacer(modifier = Modifier.height(30.dp))
+
         Button(
             onClick = {
                 cargando = true
-                CoroutineScope(Dispatchers.Main).launch {
+                scope.launch {
                     delay(2000)
                     cargando = false
                     navController.navigate("tramites")
@@ -101,7 +141,7 @@ fun SeleccionarTramite(navController: NavController) {
                     color = Color.White
                 )
             } else {
-                Text("Enviar solicitud", fontSize = 16.sp)
+                Text("Enviar y agregar solicitud", fontSize = 16.sp)
             }
         }
     }
