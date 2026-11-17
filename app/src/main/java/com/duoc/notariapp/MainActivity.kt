@@ -16,6 +16,7 @@ import com.duoc.notariapp.uii.Registro
 import com.duoc.notariapp.uii.CamaraFotos
 import com.duoc.notariapp.uii.BotonCargando
 import com.duoc.notariapp.uii.Navegacion
+import com.duoc.notariapp.uii.TramitesApiScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,6 +28,8 @@ class MainActivity : ComponentActivity() {
                 //CamaraFotos()
                 //BotonCargando()
                 Navegacion()
+                TramitesApiScreen()
+
                 }
             }
         }
