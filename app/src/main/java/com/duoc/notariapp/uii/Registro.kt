@@ -14,6 +14,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.duoc.notariapp.R
+import com.duoc.notariapp.model.UsuarioApi
+import com.duoc.notariapp.repository.TramiteRepository
+import kotlinx.coroutines.launch
 
 @Composable
 fun Registro(navController: NavController) {
@@ -21,7 +24,11 @@ fun Registro(navController: NavController) {
     var contrasena by remember { mutableStateOf("") }
     var errorCorreo by remember { mutableStateOf(false) }
     var errorContrasena by remember { mutableStateOf(false) }
+    var cargando by remember { mutableStateOf(false) }
+
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val repository = remember { TramiteRepository() }
 
     Column(
         modifier = Modifier
@@ -96,17 +103,44 @@ fun Registro(navController: NavController) {
                 errorContrasena = !contrasenaValida
 
                 if (correoValido && contrasenaValida) {
-                    Toast.makeText(context, "Ingreso correctamente", Toast.LENGTH_SHORT).show()
-                    navController.navigate("paginaPrincipal") {
-                        popUpTo("login") { inclusive = true }
+                    scope.launch {
+                        cargando = true
+                        try {
+                            val usuariosExistentes = repository.obtenerUsuarios()
+                            val yaRegistrado = usuariosExistentes.any {
+                                it.correo.equals(correo.trim(), ignoreCase = true)
+                            }
+
+                            if (!yaRegistrado) {
+                                val nuevoUsuario = UsuarioApi(
+                                    nombre = correo.substringBefore("@"),
+                                    rut = "No especificado",
+                                    correo = correo.trim(),
+                                    telefono = "No especificado"
+                                )
+                                repository.crearUsuario(nuevoUsuario)
+                                Toast.makeText(context, "Usuario registrado en Xano", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Sesión iniciada correctamente", Toast.LENGTH_SHORT).show()
+                            }
+
+                            navController.navigate("paginaPrincipal") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Error de conexión con Xano: ${e.message}", Toast.LENGTH_LONG).show()
+                        } finally {
+                            cargando = false
+                        }
                     }
                 } else {
                     Toast.makeText(context, "Por favor completa los campos correctamente", Toast.LENGTH_SHORT).show()
                 }
             },
+            enabled = !cargando,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Iniciar sesion")
+            Text(if (cargando) "Conectando con Xano..." else "Iniciar sesion")
         }
     }
 }

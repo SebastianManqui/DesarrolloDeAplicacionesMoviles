@@ -1,6 +1,5 @@
 package com.duoc.notariapp.viewmodel
 
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.duoc.notariapp.model.TramiteApi
@@ -19,6 +18,9 @@ class TramitesViewModel : ViewModel() {
     private val _usuarios = MutableStateFlow<List<UsuarioApi>>(emptyList())
     val usuarios: StateFlow<List<UsuarioApi>> = _usuarios
 
+    private val _mensajeEstado = MutableStateFlow("")
+    val mensajeEstado: StateFlow<String> = _mensajeEstado
+
     init {
         obtenerTramites()
         obtenerUsuarios()
@@ -29,6 +31,7 @@ class TramitesViewModel : ViewModel() {
             try {
                 _tramites.value = repository.obtenerTramites()
             } catch (e: Exception) {
+                _mensajeEstado.value = "Error al cargar trámites: ${e.message}"
                 e.printStackTrace()
             }
         }
@@ -36,15 +39,18 @@ class TramitesViewModel : ViewModel() {
 
     fun agregarTramite(nombre: String, descripcion: String, precio: Double) {
         viewModelScope.launch {
+            _mensajeEstado.value = "Guardando trámite en Xano..."
             try {
                 val nuevoTramite = TramiteApi(
-                    nombre = nombre,
-                    descripcion = descripcion,
+                    nombre = nombre.trim(),
+                    descripcion = descripcion.trim(),
                     precio = precio
                 )
                 repository.crearTramite(nuevoTramite)
-                obtenerTramites() // Vuelve a hacer GET para refrescar la pantalla
+                _mensajeEstado.value = "Trámite guardado correctamente en Xano"
+                obtenerTramites()
             } catch (e: Exception) {
+                _mensajeEstado.value = "Error al guardar (POST): ${e.message}"
                 e.printStackTrace()
             }
         }
