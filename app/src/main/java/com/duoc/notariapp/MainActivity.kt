@@ -27,8 +27,8 @@ class MainActivity : ComponentActivity() {
                 //Registro()
                 //CamaraFotos()
                 //BotonCargando()
-                //Navegacion()
-                TramitesApiScreen()
+                Navegacion()
+                //TramitesApiScreen()
 
                 }
             }

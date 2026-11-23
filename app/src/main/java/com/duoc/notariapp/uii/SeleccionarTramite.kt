@@ -1,6 +1,7 @@
 package com.duoc.notariapp.uii
 
-import androidx.compose.foundation.clickable
+import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,33 +13,49 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.duoc.notariapp.model.TramiteApi
+import com.duoc.notariapp.viewmodel.TramitesViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SeleccionarTramite(navController: NavController) {
+fun SeleccionarTramite(
+    navController: NavController,
+    viewModel: TramitesViewModel = viewModel()
+) {
+    val tramitesApi by viewModel.tramites.collectAsState()
+    val mensajeEstado by viewModel.mensajeEstado.collectAsState()
+
     var tipoTramite by remember { mutableStateOf("") }
     var sucursal by remember { mutableStateOf("") }
+    var precioInput by remember { mutableStateOf("") }
+    var tramiteSeleccionado by remember { mutableStateOf<TramiteApi?>(null) }
     var cargando by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-    val tramitesDisponibles = listOf(
-        "Declaración Jurada",
-        "Poder Simple",
-        "Contrato de Arriendo",
-        "Validación de Firma",
-        "Fotocopia Legalizada"
+    val tramitesRespaldo = listOf(
+        TramiteApi(nombre = "Declaración Jurada", descripcion = "Trámite notarial", precio = 35000.0),
+        TramiteApi(nombre = "Poder Simple", descripcion = "Trámite notarial", precio = 45000.0),
+        TramiteApi(nombre = "Contrato de Arriendo", descripcion = "Trámite notarial", precio = 35000.0),
+        TramiteApi(nombre = "Validación de Firma", descripcion = "Trámite notarial", precio = 15000.0),
+        TramiteApi(nombre = "Fotocopia Legalizada", descripcion = "Trámite notarial", precio = 10000.0)
     )
+
+    val listaSugeridos = tramitesApi.ifEmpty { tramitesRespaldo }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
@@ -59,14 +76,14 @@ fun SeleccionarTramite(navController: NavController) {
             Text(text = "Iniciar Nuevo Trámite", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "Ingresa los detalles de la solicitud",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Completa los campos o selecciona uno de la lista rápida.",
+            text = "Completa los campos o selecciona un trámite disponible en Xano.",
             fontSize = 13.sp,
             color = Color.Gray
         )
@@ -85,20 +102,31 @@ fun SeleccionarTramite(navController: NavController) {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            tramitesDisponibles.forEach { tramite ->
+            listaSugeridos.forEach { tramite ->
                 SuggestionChip(
-                    onClick = { tipoTramite = tramite },
-                    label = { Text(tramite, fontSize = 12.sp) },
+                    onClick = {
+                        tramiteSeleccionado = tramite
+                        tipoTramite = tramite.nombre
+                        precioInput = if (tramite.precio % 1.0 == 0.0) {
+                            tramite.precio.toInt().toString()
+                        } else {
+                            tramite.precio.toString()
+                        }
+                    },
+                    label = { Text(tramite.nombre, fontSize = 12.sp) },
                     shape = RoundedCornerShape(8.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = tipoTramite,
-            onValueChange = { tipoTramite = it },
+            onValueChange = {
+                tipoTramite = it
+                tramiteSeleccionado = null
+            },
             label = { Text("Tipo de trámite") },
             placeholder = { Text("Escribe o selecciona un trámite") },
             modifier = Modifier.fillMaxWidth(),
@@ -106,7 +134,7 @@ fun SeleccionarTramite(navController: NavController) {
             shape = RoundedCornerShape(10.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedTextField(
             value = sucursal,
@@ -117,14 +145,35 @@ fun SeleccionarTramite(navController: NavController) {
             shape = RoundedCornerShape(10.dp)
         )
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = precioInput,
+            onValueChange = { precioInput = it },
+            label = { Text("Valor del trámite (ej: 35000)") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            shape = RoundedCornerShape(10.dp)
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
 
         Button(
             onClick = {
+                val precioLimpio = precioInput.replace(".", "").replace("$", "").trim()
+                val precioDouble = precioLimpio.toDoubleOrNull() ?: 0.0
+                val descripcionConSucursal = "Sucursal: ${sucursal.trim()}"
+
                 cargando = true
                 scope.launch {
-                    delay(2000)
+                    viewModel.agregarTramite(
+                        nombre = tipoTramite,
+                        descripcion = descripcionConSucursal,
+                        precio = precioDouble
+                    )
+                    delay(1200)
                     cargando = false
+                    Toast.makeText(context, "Solicitud enviada y guardada en Xano", Toast.LENGTH_SHORT).show()
                     navController.navigate("tramites")
                 }
             },
@@ -142,6 +191,79 @@ fun SeleccionarTramite(navController: NavController) {
                 )
             } else {
                 Text("Enviar y agregar solicitud", fontSize = 16.sp)
+            }
+        }
+
+        if (mensajeEstado.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = mensajeEstado,
+                color = if (mensajeEstado.startsWith("Error")) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.primary
+                },
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Catálogo en Xano (Toca para seleccionar)",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        tramitesApi.forEach { tramite ->
+            val estaSeleccionado = tramiteSeleccionado?.id == tramite.id &&
+                    tramiteSeleccionado?.nombre == tramite.nombre
+
+            Card(
+                onClick = {
+                    tramiteSeleccionado = tramite
+                    tipoTramite = tramite.nombre
+                    precioInput = if (tramite.precio % 1.0 == 0.0) {
+                        tramite.precio.toInt().toString()
+                    } else {
+                        tramite.precio.toString()
+                    }
+                },
+                border = if (estaSeleccionado) {
+                    BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                } else {
+                    null
+                },
+                colors = CardDefaults.cardColors(
+                    containerColor = if (estaSeleccionado) {
+                        MaterialTheme.colorScheme.secondaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    }
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Text(
+                        text = tramite.nombre,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    )
+                    Text(
+                        text = tramite.descripcion,
+                        fontSize = 13.sp
+                    )
+                    Text(
+                        text = "Valor: $${tramite.precio}",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }

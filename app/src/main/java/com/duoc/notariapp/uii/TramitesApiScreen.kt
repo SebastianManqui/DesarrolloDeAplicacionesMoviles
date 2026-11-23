@@ -1,5 +1,6 @@
 package com.duoc.notariapp.uii
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.duoc.notariapp.model.TramiteApi
 import com.duoc.notariapp.viewmodel.TramitesViewModel
 
 @Composable
@@ -21,6 +23,7 @@ fun TramitesApiScreen(viewModel: TramitesViewModel = viewModel()) {
     var descripcionInput by remember { mutableStateOf("") }
     var precioInput by remember { mutableStateOf("") }
     var errorLocal by remember { mutableStateOf("") }
+    var tramiteSeleccionado by remember { mutableStateOf<TramiteApi?>(null) }
 
     Column(
         modifier = Modifier
@@ -121,10 +124,59 @@ fun TramitesApiScreen(viewModel: TramitesViewModel = viewModel()) {
             fontWeight = FontWeight.Bold
         )
 
+        tramiteSeleccionado?.let { seleccionado ->
+            Spacer(modifier = Modifier.height(8.dp))
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Seleccionado: ${seleccionado.nombre}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Valor: $${seleccionado.precio}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    TextButton(onClick = { tramiteSeleccionado = null }) {
+                        Text("Quitar")
+                    }
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
 
         tramites.forEach { tramite ->
+            val estaSeleccionado = tramiteSeleccionado?.id == tramite.id &&
+                    tramiteSeleccionado?.nombre == tramite.nombre
+
             Card(
+                onClick = { tramiteSeleccionado = tramite },
+                border = if (estaSeleccionado) {
+                    BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                } else {
+                    null
+                },
+                colors = CardDefaults.cardColors(
+                    containerColor = if (estaSeleccionado) {
+                        MaterialTheme.colorScheme.secondaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    }
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
