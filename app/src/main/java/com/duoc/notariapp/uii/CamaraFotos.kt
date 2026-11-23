@@ -1,5 +1,6 @@
 package com.duoc.notariapp.uii
 
+
 import android.Manifest
 import android.graphics.Bitmap
 import android.net.Uri
@@ -9,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,26 +19,26 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.navigation.NavController
 import java.io.File
 
 @Composable
-fun CamaraFotos() {
+fun CamaraFotos(navController: NavController? = null) {
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     var permisoConcedido by remember { mutableStateOf(false) }
 
-    // Lanzador de cámara
     val takePictureLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
         if (success && imageUri != null) {
+            @Suppress("DEPRECATION")
             val bmp = MediaStore.Images.Media.getBitmap(context.contentResolver, imageUri)
             bitmap = bmp
         }
     }
 
-    // Permiso de cámara
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -57,6 +59,7 @@ fun CamaraFotos() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -69,11 +72,24 @@ fun CamaraFotos() {
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
-        Button(onClick = {
-            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-        }) {
+
+        Button(
+            onClick = {
+                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text("Tomar foto de perfil")
         }
-        Spacer(modifier = Modifier.height(16.dp))
+
+        if (navController != null) {
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Volver")
+            }
+        }
     }
 }
